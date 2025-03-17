@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const input_text = formData.get("input_text") as string;
+    const voice = formData.get("voice") as string || GEORGE_VOICE;
     
     if (!input_text || input_text=="") {
       return NextResponse.json({ error: "No text to transform" }, { status: 400 });
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     const client = new ElevenLabsClient({ apiKey });
 
-    const response = await client.textToSpeech.convert(GEORGE_VOICE, {
+    const response = await client.textToSpeech.convert(voice, {
       output_format: "mp3_44100_128",
       text:input_text,
       model_id: tts_model
