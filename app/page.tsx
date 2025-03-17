@@ -27,7 +27,8 @@ export default function Home() {
   
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedVoice(event.target.value);
-    setSelectedPreviewURL(voices.find(o => o.id == event.target.value)?.preview_url);
+    const previewURL = voices.find(o => o.id === event.target.value)?.preview_url || "";
+    setSelectedPreviewURL(previewURL);
   };
 
   const handlePlayVoicePreview = () =>{
