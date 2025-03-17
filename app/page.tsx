@@ -32,8 +32,10 @@ export default function Home() {
   };
 
   const handlePlayVoicePreview = () =>{
-    voicePreviewRef.current.load();
-    voicePreviewRef.current.play();
+    if (voicePreviewRef.current) { // Ensure ref is not null
+      voicePreviewRef.current.load();
+      voicePreviewRef.current.play().catch((error) => console.error("Audio play error:", error));
+    }
   }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
