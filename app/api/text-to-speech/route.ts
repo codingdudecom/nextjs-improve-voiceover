@@ -8,7 +8,7 @@ const BRITNEY_VOICE = "kPzsL2i3teMYv0FxEYQ6",
       GEORGE_VOICE="JBFqnCBsd6RMkjVDRZzb";
 const tts_model = "eleven_multilingual_v2";
 
-export async function POST(req: NextRequest, res:NextResponse) {
+export async function POST(req: NextRequest) {
   
   try {
     const formData = await req.formData();

@@ -18,7 +18,8 @@ export default function Home() {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = event.target.files?.[0] || null;
-    if (uploadedFile && !["audio/wav", "audio/mp3"].includes(uploadedFile.type)) {
+    // if (uploadedFile && !["audio/wav", "audio/mp3", "audio/mpeg"].includes(uploadedFile.type)) {
+    if (uploadedFile && uploadedFile.type.indexOf("audio/") < 0){
       alert("Only WAV or MP3 files are allowed.");
       return;
     }
@@ -29,6 +30,7 @@ export default function Home() {
     
     
     setProgress(prevProgress =>{
+      prevProgress = prevProgress.filter(msg => msg.indexOf("wait...") < 0);
       return [...prevProgress,`<h2 class="font-bold">${title}</h2><p class="max-h-24 overflow-y-auto border border-gray-300 p-2 rounded">${description}</p>`]
   });
   }
