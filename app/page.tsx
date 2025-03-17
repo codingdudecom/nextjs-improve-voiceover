@@ -28,7 +28,9 @@ export default function Home() {
   const addProgress = (title:string,description:string) => {
     
     
-    setProgress(prevProgress => [...prevProgress,`<h2 class="font-bold">${title}</h2><p class="max-h-24 overflow-y-auto border border-gray-300 p-2 rounded">${description}</p>`]);
+    setProgress(prevProgress =>{
+      return [...prevProgress,`<h2 class="font-bold">${title}</h2><p class="max-h-24 overflow-y-auto border border-gray-300 p-2 rounded">${description}</p>`]
+  });
   }
   const handleStartProcessing = async () => {
     if (!file) {
