@@ -135,7 +135,7 @@ export default function Home() {
       formData.append("chunk", chunk);
       formData.append("index", index +"");
       formData.append("totalChunks", totalChunks+"");
-      formData.append("fileName", file.name);
+      formData.append("fileName", (file as File).name);
 
       await fetch("/api/speech-to-text-chunks", {
         method: "POST",
@@ -149,7 +149,7 @@ export default function Home() {
       // Notify server to merge & process
       const response = await fetch("/api/speech-to-text-chunks", {
         method: "POST",
-        body: JSON.stringify({ fileName: file.name, merge: true }),
+        body: JSON.stringify({ fileName: (file as File).name, merge: true }),
         headers: { "Content-Type": "application/json" },
       });
   
