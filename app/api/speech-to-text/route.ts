@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ElevenLabsClient } from "elevenlabs";
 
-const stt_model_id = "scribe_v1"
+const stt_model_id =  "scribe_v1";
 export async function POST(req: NextRequest) {
   // return NextResponse.json({text:"She don't like going to the park because its too far away. I was thinking of going there later but I can't find my shoes. We should of gone together if I had know where they was."});
   try {

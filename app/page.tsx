@@ -1,7 +1,7 @@
 "use client"
 
 import { useState,useEffect, useRef } from "react";
-import { UploadCloud, CirclePlay } from "lucide-react";
+import { UploadCloud, CirclePlay, Mic, StopCircle } from "lucide-react";
 import ProgressList from "../components/progress-list"
 
 
@@ -21,6 +21,12 @@ export default function Home() {
   const voicePreviewRef = useRef<HTMLAudioElement | null>(null);
   const [selectedVoice, setSelectedVoice] = useState(voices[0].id);
   const [selectedPreviewURL, setSelectedPreviewURL] = useState(voices[0].preview_url);
+
+  const [recording, setRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+
+
+  const [textCleanupComplete, setTextCleanupComplete] = useState(false);
 
   // setProgress([...progress,"<h2>Speech to text done:</h2><p></p>"]);
   
@@ -48,15 +54,35 @@ export default function Home() {
     setFile(uploadedFile);
   };
 
-  const addProgress = (title:string,description:string) => {
+  const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const recorder = new MediaRecorder(stream);
+    recorder.ondataavailable = (event) => {
+      const audioBlob = new Blob([event.data], { type: "audio/wav" });
+      audioBlob.name = "recording.wav";
+      setFile(audioBlob);
+    };
+    recorder.start();
+    setMediaRecorder(recorder);
+    setRecording(true);
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      setRecording(false);
+    }
+  };
+
+  const addProgress = (title:string,description:string, editable:bool=false) => {
     
     
     setProgress(prevProgress =>{
       prevProgress = prevProgress.filter(msg => msg.indexOf("wait...") < 0);
-      return [...prevProgress,`<h2 class="font-bold">${title}</h2><p class="max-h-24 overflow-y-auto ${description.indexOf("wait...")>=0?"":"border border-gray-300"} p-2 rounded">${description}</p>`]
+      return [...prevProgress,`<h2 class="font-bold">${title}</h2><p contenteditable="${editable?"true":"false"}" class="max-h-24 overflow-y-auto ${(description.indexOf("wait...")>=0 || !editable)?"":"border border-gray-300"} p-2 rounded">${description}</p>`]
   });
   }
-  const handleStartProcessing = async () => {
+  const handleStartProcessing1 = async () => {
     setProgress([]);
     if (!file) {
       alert("Please upload a voice recording.");
@@ -71,6 +97,60 @@ export default function Home() {
       const response = await fetch("/api/speech-to-text", {
         method: "POST",
         body: formData,
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to process file");
+      }
+  
+      const data = await response.json();
+
+      addProgress("Script text extracted",data.text);
+      await handleScriptCleanup(data.text);
+      console.log("Processing result:", data);
+    } catch (error) {
+      console.error("Error processing the file:", error);
+      alert("An error occurred while processing the file.");
+    }
+  };
+
+  const handleStartProcessing = async () => {
+    setProgress([]);
+    if (!file) {
+      alert("Please upload a voice recording.");
+      return;
+    }
+
+    const chunkSize = 1024 * 1024; // 1MB
+    const totalChunks = Math.ceil(file.size / chunkSize);
+
+    addProgress("Uploading audio","wait...");
+
+    for (let index = 0; index < totalChunks; index++) {
+      const start = index * chunkSize;
+      const end = Math.min(start + chunkSize, file.size);
+      const chunk = file.slice(start, end);
+
+      const formData = new FormData();
+      formData.append("chunk", chunk);
+      formData.append("index", index);
+      formData.append("totalChunks", totalChunks);
+      formData.append("fileName", file.name);
+
+      await fetch("/api/speech-to-text-chunks", {
+        method: "POST",
+        body: formData,
+      });
+    }
+  
+    addProgress("Extracting text from audio","wait...");
+
+    try {
+      // Notify server to merge & process
+      const response = await fetch("/api/speech-to-text-chunks", {
+        method: "POST",
+        body: JSON.stringify({ fileName: file.name, merge: true }),
+        headers: { "Content-Type": "application/json" },
       });
   
       if (!response.ok) {
@@ -106,14 +186,27 @@ export default function Home() {
   
       const data = await response.json();
 
-      addProgress("Script cleanup complete",data.text);
-      await handleTTS(data.text);
+      addProgress("Script cleanup complete",data.text,true);
+      // await handleTTS(data.text);
+      setTextCleanupComplete(true);
     } catch (error) {
       console.error("Error cleaning up text:", error);
       alert("An error occurred while cleaning up the text.");
     }
   }
 
+  const handleFinishProcessing = async () => {
+
+    const element = Array.from(document.querySelectorAll("p[contenteditable=true]")).pop();
+    let text = element.innerText;
+    setProgress(prevProgress => {
+      prevProgress[prevProgress.length - 1] = element.parentElement.innerHTML;
+      return prevProgress;
+    })
+    console.log(text);
+    text = text.length > 5000 ? text.substring(0, 5000) : text;
+    await handleTTS(text);
+  }
   const handleTTS = async (input_text:string) => {
     addProgress("Generating new audio","wait...");
 
@@ -173,7 +266,15 @@ export default function Home() {
               </div>
             )}
           </label>
-  
+          
+          <button
+            onClick={recording ? stopRecording : startRecording}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-white ${recording ? "bg-red-500 hover:bg-red-600" : "bg-blue-500 hover:bg-blue-600"}`}
+          >
+            {recording ? <StopCircle className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            {recording ? "Stop Recording" : "Record Audio"}
+          </button>
+
           <label htmlFor="instructions" className="text-sm font-medium text-gray-700">
               Text cleanup instructions:
           </label>
@@ -217,6 +318,11 @@ export default function Home() {
           </button>
 
           <ProgressList progress={[...progress]} />
+
+          { textCleanupComplete && (
+          <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg" onClick={handleFinishProcessing}>
+            Create audio
+          </button> ) }
 
           {audioUrl && (
             <div className="audio-player mt-10">
