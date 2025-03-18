@@ -13,7 +13,7 @@ const voices = [
 
 const initialProgress:string[] = [];
 export default function Home() {
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | Blob | null>(null);
   const [instructions, setInstructions] = useState("Your task is to correct any errors, improve grammar and clarity, and ensure the transcript is coherent and accurate. Don't leave out any sentences.");
   const [progress,setProgress] = useState<string[]>(initialProgress)
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export default function Home() {
   const [selectedPreviewURL, setSelectedPreviewURL] = useState(voices[0].preview_url);
 
   const [recording, setRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
 
 
   const [textCleanupComplete, setTextCleanupComplete] = useState(false);
@@ -59,7 +59,7 @@ export default function Home() {
     const recorder = new MediaRecorder(stream);
     recorder.ondataavailable = (event) => {
       const audioBlob = new Blob([event.data], { type: "audio/wav" });
-      audioBlob.name = "recording.wav";
+      (audioBlob as any).name = "recording.wav";
       setFile(audioBlob);
     };
     recorder.start();
@@ -74,7 +74,7 @@ export default function Home() {
     }
   };
 
-  const addProgress = (title:string,description:string, editable:bool=false) => {
+  const addProgress = (title:string,description:string, editable:boolean=false) => {
     
     
     setProgress(prevProgress =>{
@@ -133,8 +133,8 @@ export default function Home() {
 
       const formData = new FormData();
       formData.append("chunk", chunk);
-      formData.append("index", index);
-      formData.append("totalChunks", totalChunks);
+      formData.append("index", index +"");
+      formData.append("totalChunks", totalChunks+"");
       formData.append("fileName", file.name);
 
       await fetch("/api/speech-to-text-chunks", {
@@ -197,10 +197,10 @@ export default function Home() {
 
   const handleFinishProcessing = async () => {
 
-    const element = Array.from(document.querySelectorAll("p[contenteditable=true]")).pop();
+    const element = Array.from(document.querySelectorAll("p[contenteditable=true]")).pop() as HTMLElement;
     let text = element.innerText;
     setProgress(prevProgress => {
-      prevProgress[prevProgress.length - 1] = element.parentElement.innerHTML;
+      prevProgress[prevProgress.length - 1] = element?.parentElement?.innerHTML || "";
       return prevProgress;
     })
     console.log(text);
@@ -221,9 +221,12 @@ export default function Home() {
         body: formData,
       });
   
-      // if (!response.ok) {
-      //   throw new Error("Failed to generate audio");
-      // }
+      if (!response.ok) {
+        if (response.status == 401){
+          throw new Error("Audio generation limit exceeded");  
+        }
+        throw new Error("Failed to generate audio");
+      }
   
     // Get the blob from the response
     const blob = await response.blob();

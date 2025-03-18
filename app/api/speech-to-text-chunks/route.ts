@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ElevenLabsClient } from "elevenlabs";
 import fs from "fs";
 import path from "path";
-import { IncomingForm } from "formidable";
-import { Readable } from "stream";
-import { promisify } from "util";
+
 
 const stt_model_id = "scribe_v1";
 const uploadDir = "/tmp/uploads"; // Temporary storage
@@ -64,7 +62,7 @@ async function processAudio(fileName: string) {
   fileStream.end();
 
   // Ensure the file is fully closed before proceeding
-  await new Promise((resolve) => fileStream.on("finish", resolve));
+  await new Promise<void>((resolve) => fileStream.on("finish",  resolve));
 console.log(`Final file path: ${finalPath}`);  // Check the final path
   if (!fs.existsSync(finalPath)) {
     return NextResponse.json({ error: "Merged file not found" }, { status: 500 });

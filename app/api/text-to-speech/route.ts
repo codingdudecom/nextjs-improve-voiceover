@@ -31,6 +31,8 @@ export async function POST(req: NextRequest) {
       text:input_text,
       model_id: tts_model
   });
+
+  
   const fileName = `${uuid()}.mp3`;
       // Convert Node.js stream to buffer
       const chunks = [];
@@ -47,7 +49,7 @@ export async function POST(req: NextRequest) {
         }
       });
   } catch (error) {
-    
+    console.log(error);
     return NextResponse.json({ error: "Processing failed", details: error }, { status: 500 });
   }
 }
