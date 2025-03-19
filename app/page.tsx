@@ -11,6 +11,8 @@ const voices = [
 
 //https://storage.googleapis.com/eleven-public-prod/custom/voices/OlBp4oyr3FBAGEAtJOnU/Uub5cEzcyVo34vqgA9cA.mp3
 
+const API_VERSION = "v1";
+
 const initialProgress:string[] = [];
 export default function Home() {
   const [file, setFile] = useState<File | Blob | null>(null);
@@ -94,7 +96,7 @@ export default function Home() {
     addProgress("Extracting text from audio","wait...");
 
     try {
-      const response = await fetch("/api/speech-to-text", {
+      const response = await fetch(`/api/${API_VERSION}/speech-to-text`, {
         method: "POST",
         body: formData,
       });
@@ -137,7 +139,7 @@ export default function Home() {
       formData.append("totalChunks", totalChunks+"");
       formData.append("fileName", (file as File).name);
 
-      await fetch("/api/speech-to-text-chunks", {
+      await fetch(`/api/${API_VERSION}/speech-to-text-chunks`, {
         method: "POST",
         body: formData,
       });
@@ -147,7 +149,7 @@ export default function Home() {
 
     try {
       // Notify server to merge & process
-      const response = await fetch("/api/speech-to-text-chunks", {
+      const response = await fetch(`/api/speech-to-text-chunks`, {
         method: "POST",
         body: JSON.stringify({ fileName: (file as File).name, merge: true }),
         headers: { "Content-Type": "application/json" },
@@ -175,7 +177,7 @@ export default function Home() {
     formData.append("instructions", instructions);
 
     try {
-      const response = await fetch("/api/text-cleanup", {
+      const response = await fetch(`/api/text-cleanup`, {
         method: "POST",
         body: formData,
       });
@@ -216,7 +218,7 @@ export default function Home() {
     console.log(selectedVoice);
 
     try {
-      const response = await fetch("/api/text-to-speech", {
+      const response = await fetch(`/api/text-to-speech`, {
         method: "POST",
         body: formData,
       });
@@ -261,7 +263,7 @@ export default function Home() {
           <label className="block mb-4 cursor-pointer border-dashed border-2 border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50">
             <input type="file" className="hidden" accept="audio/*" onChange={handleFileChange} />
             {file ? (
-              <p className="text-gray-700">{file.name}</p>
+              <p className="text-gray-700">{(file as File).name}</p>
             ) : (
               <div className="flex flex-col items-center text-gray-500">
                 <UploadCloud className="w-10 h-10 mb-2" />
