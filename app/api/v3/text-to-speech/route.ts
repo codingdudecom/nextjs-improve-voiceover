@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   for (const text of textChunks){
     console.log("Text:",text);
     const audio = await tts.generate(text, {
-      voice
+      voice: voice as "af_heart" | "af_alloy" | "af_aoede" | "af_bella" | "af_jessica" | "af_kore" | "af_nicole" | "af_nova" | "af_river" | "af_sarah" | "af_sky" | "am_adam" | "am_echo" | "am_eric" | "am_grace" | "am_michael"
       // Use `tts.list_voices()` to list all available voices
       // voice: "af_heart",
     });
