@@ -10,13 +10,23 @@
   },
   "dependencies": {
     "@cerebras/cerebras_cloud_sdk": "^1.25.0",
+    "@google-cloud/speech": "^7.0.0",
+    "@huggingface/transformers": "^3.4.0",
     "elevenlabs": "^1.54.0",
     "formidable": "^3.5.2",
+    "fs-extra": "^11.3.0",
+    "groq": "^3.80.1",
+    "groq-sdk": "^0.17.0",
+    "kokoro-js": "^1.1.1",
+    "light-audio-converter": "^1.0.6",
     "lucide-react": "^0.482.0",
     "next": "15.2.2",
+    "node-web-audio-api": "^1.0.3",
+    "nodejs-whisper": "^0.2.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "wavefile": "^11.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
