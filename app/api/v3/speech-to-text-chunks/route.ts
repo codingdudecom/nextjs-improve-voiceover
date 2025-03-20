@@ -101,7 +101,7 @@ async function startTranscribe(filePath: string) {
     const output = await transcriber(await audioFileToData(filePath));
     // console.log(output);
     return NextResponse.json(output);
-  } catch (e) {
+  } catch (e:any) {
     console.error(e);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
