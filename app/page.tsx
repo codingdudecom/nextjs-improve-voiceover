@@ -45,7 +45,7 @@ export default function Home() {
           const resp = await fetch(`/api/${API_VERSION}/text-to-speech`, {
           method: "GET"
       });
-      const vArr:Array = await resp.json();
+      const vArr:Array<any> = await resp.json();
       setVoices(vArr);
       setSelectedVoice(vArr[0].id);
       console.log(vArr[0]);
