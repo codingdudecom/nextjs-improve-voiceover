@@ -108,7 +108,7 @@ async function startTranscribe(filePath: string) {
 }
 
 // Helper function to convert Buffer to ArrayBuffer
-function bufferToArrayBuffer(buffer) {
+function bufferToArrayBuffer(buffer:any) {
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 }
 async function audioFileToData(filePath:string) {
