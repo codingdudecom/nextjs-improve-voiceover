@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ElevenLabsClient } from "elevenlabs";
 import { v4 as uuid } from "uuid";
 import { createWriteStream,readFileSync,unlinkSync } from "fs";
-import { KokoroTTS, VOICES } from "kokoro-js";
+import { KokoroTTS } from "kokoro-js";
 
 const model_id = "onnx-community/Kokoro-82M-ONNX";
 const tts = await KokoroTTS.from_pretrained(model_id, {
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const input_text = formData.get("input_text") as string;
-    const voice = formData.get("voice") as string || "af_heart";
+    const voice:any = formData.get("voice") || "af_heart";
 
     console.log(voice);
     
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   for (const text of textChunks){
     console.log("Text:",text);
     const audio = await tts.generate(text, {
-      voice: voice as keyof VOICES
+      voice
       // Use `tts.list_voices()` to list all available voices
       // voice: "af_heart",
     });
