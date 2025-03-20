@@ -98,7 +98,7 @@ async function transcribeWithGroq(filePath:string){
 async function startTranscribe(filePath: string) {
   try{
     const transcriber = await pipeline("automatic-speech-recognition", "onnx-community/moonshine-tiny-ONNX");
-    const output = await transcriber(audioFileToData(filePath));
+    const output = await transcriber(await audioFileToData(filePath));
     // console.log(output);
     return NextResponse.json(output);
   } catch (e) {
